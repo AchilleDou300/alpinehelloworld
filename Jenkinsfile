@@ -73,13 +73,10 @@ pipeline {
             }
         }
 
-        stage ('Deploy in staging') {
+                stage ('Deploy in staging') {
             agent any
             when {
                 expression { GIT_BRANCH == 'origin/master' }
-            }
-            environment {
-                HOSTNAME_DEPLOY_STAGING = "54.205.171.253"
             }
             steps {
                 sshagent(credentials : ['SSH_AUTH_SERVER']) {
@@ -101,13 +98,21 @@ pipeline {
             }
         }
 
+        stage ('Test staging') {
+            agent any
+            steps {
+                script {
+                    sh '''
+                        curl ${HOSTNAME_DEPLOY_STAGING} | grep -q "Hello world Lewis!"
+                    '''
+                }
+            }
+        }
+
         stage ('Deploy in prod') {
             agent any
             when {
                 expression { GIT_BRANCH == 'origin/master' }
-            }
-            environment {
-                HOSTNAME_DEPLOY_PROD = "35.153.140.131"
             }
             steps {
                 sshagent(credentials : ['SSH_AUTH_SERVER']) {
@@ -124,6 +129,17 @@ pipeline {
                             -o SendEnv=DOCKERHUB_AUTH_USR \
                             -o SendEnv=DOCKERHUB_AUTH_PSW \
                             -C "${command1} && ${command2} && ${command3} && ${command4}"
+                    '''
+                }
+            }
+        }
+
+        stage ('Test prod') {
+            agent any
+            steps {
+                script {
+                    sh '''
+                        curl ${HOSTNAME_DEPLOY_PROD} | grep -q "Hello world Lewis!"
                     '''
                 }
             }
