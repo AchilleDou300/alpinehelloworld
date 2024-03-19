@@ -5,6 +5,8 @@ pipeline {
         DOCKERHUB_AUTH = credentials('DOCKERHUB_AUTH')
         ID_DOCKER = "${DOCKERHUB_AUTH_USR}"
         PORT_EXPOSED = "80"
+        HOSTNAME_DEPLOY_STAGING = "54.205.171.253"
+        HOSTNAME_DEPLOY_PROD = "35.153.140.131"
     }
 
     stages {
@@ -73,7 +75,7 @@ pipeline {
             }
         }
 
-                stage ('Deploy in staging') {
+        stage ('Deploy in staging') {
             agent any
             when {
                 expression { GIT_BRANCH == 'origin/master' }
